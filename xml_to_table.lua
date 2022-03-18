@@ -290,7 +290,7 @@ end
 
 local function stepEq(self)
 	self:ws()
-	self:fetchReq("^=", "failed to parse eq (=) separating key-value pair")
+	self:fetchReq("^=", false, "failed to parse eq (=) separating key-value pair")
 	self:ws()
 end
 
@@ -365,7 +365,7 @@ local function getXMLDecl(self, xml_state, pos_initial)
 
 	local version_num, encoding_val, standalone_val
 
-	self:fetchReq("^%s+version", "couldn't read xmlDecl mandatory version identifier")
+	self:fetchReq("^%s+version", false, "couldn't read xmlDecl mandatory version identifier")
 	stepEq(self)
 
 	self:capReq("^([\"'])(1%.[0-9]+)%1", "couldn't read xmlDecl version value")
@@ -381,7 +381,7 @@ local function getXMLDecl(self, xml_state, pos_initial)
 		standalone_val = getAttribQuoted(self, "couldn't read xmlDecl standalone value")
 	end
 
-	self:fetchReq("^(%?>)", "couldn't find xmlDecl closing '?>'")
+	self:fetchReq("^(%?>)", false, "couldn't find xmlDecl closing '?>'")
 
 	local decl = {}
 	decl.id = "xml_decl"
@@ -399,8 +399,8 @@ local function getXMLComment(self, xml_state)
 	-- Find the comment close and collect an exclusive substring
 	local pos_start = self.pos
 
-	self:fetchReq("%-%-", "couldn't find closing '--'")
-	self:fetchReq("^>", "couldn't find '>' to go with closing '--'")
+	self:fetchReq("%-%-", false, "couldn't find closing '--'")
+	self:fetchReq("^>", false, "couldn't find '>' to go with closing '--'")
 
 	local pos_end = self.pos - 4
 
@@ -422,7 +422,7 @@ local function getXMLProcessingInstruction(self, xml_state)
 
 	-- Find the PI close and collect an exclusive substring
 	local pos_start = self.pos
-	self:fetchReq("%?>", "failed to locate PI tag close ('?>')")
+	self:fetchReq("%?>", false, "failed to locate PI tag close ('?>')")
 
 	local pos_end = self.pos - 3
 
@@ -529,7 +529,7 @@ local function getXMLCharacterData(self, xml_state)
 		if self:lit("<![CDATA[") then
 			local pos_start = self.pos
 			-- Find closing CDATA tag.
-			self:fetchReq("%]%]>", "couldn't find closing CDATA tag")
+			self:fetchReq("%]%]>", false, "couldn't find closing CDATA tag")
 			local pos_end = self.pos - 3
 
 			-- Don't escape CDATA Sections.
@@ -543,13 +543,15 @@ local function getXMLCharacterData(self, xml_state)
 			-- Need some special handling to account for whitespace following the end of the
 			-- root element (which is permitted) versus non-ws pcdata (which is disallowed)
 			if not xml_state.doc_close then
-				self:fetchReq("<", "Couldn't find '<' that ends character data")
+				self:fetchReq("<", false, "Couldn't find '<' that ends character data")
 				self.pos = self.pos - 1
 				pos_end = self.pos - 1
 
 			else
-				if self:fetchOrEOS("<") then
+				if self:fetch("<") then
 					self.pos = self.pos - 1
+				else
+					self:goEOS()
 				end
 				pos_end = self.pos - 1
 			end
