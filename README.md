@@ -117,3 +117,15 @@ Some parsing options can be tweaked in `xmlToTable.options`. It is recommended t
 
 * XML 1.1 features.
 
+
+## Changelog
+
+### Ver 1.0.1 - 2022-03-19
+
+* Fixed XML name validation failing on names with multi-byte code units, such as `<aæe></aæe>`.
+* Added changelog.
+
+
+### Ver 1.0.0 - 2022-03-17
+
+* First standalone release.
