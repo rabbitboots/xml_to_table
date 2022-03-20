@@ -180,6 +180,11 @@ do
 	print(inspect(bad_tree))
 	
 	xmlToTable.options.validate_names = true
+	
+	-- v1.0.1: Missed some problems with name validatation.
+	local multi_byte_name = "<a123æÆŒœ321a>whoops</a123æÆŒœ321a>"
+	ok, result = errTest.expectPass(xmlToTable.convert, multi_byte_name)
+	print(inspect(result))
 
 	print("options.check_dupe_attribs")
 	ok, result = errTest.expectFail(xmlToTable.convert, "<foo dupe='one' dupe='two'></foo>")
@@ -215,5 +220,4 @@ do
 	
 	xmlToTable.options.keep_insignificant_whitespace = false
 end
-
 
