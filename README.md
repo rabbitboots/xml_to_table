@@ -1,3 +1,8 @@
+# Discontinued!
+
+xmlToTable has been discontinued, and succeeded by [Lua XML Library](https://github.com/rabbitboots/lxl).
+
+
 # xmlToTable
 
 Converts a subset of XML to nested Lua tables.
